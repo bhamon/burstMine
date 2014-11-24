@@ -12,10 +12,11 @@
 namespace cryo {
 namespace burstMine {
 namespace opencl {
+namespace js {
 
 void init(v8::Handle<v8::Object> p_exports, v8::Handle<v8::Object> p_module);
 v8::Handle<v8::Value> create(const v8::Arguments& p_args);
 
-}}}
+}}}}
 
-NODE_MODULE(opencl, burstMine::opencl::init);
+NODE_MODULE(opencl, cryo::burstMine::opencl::js::init);

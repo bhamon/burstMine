@@ -1,9 +1,10 @@
 #include "OpenclDevice.h"
 
 namespace cryo {
+namespace opencl {
 
-OpenclDevice::OpenclDevice(const cl_device_id& p_handle) throw (OpenclError)
-: m_handle(p_handle) {
+OpenclDevice::OpenclDevice(std::unique_ptr<cl_device_id>& p_handle) throw (OpenclError)
+: m_handle(std::move(p_handle)) {
 }
 
 OpenclDevice::~OpenclDevice() throw () {
@@ -11,7 +12,7 @@ OpenclDevice::~OpenclDevice() throw () {
 
 std::string OpenclDevice::getType() const throw (OpenclError) {
 	cl_device_type type;
-	cl_int error = clGetDeviceInfo(m_handle, CL_DEVICE_TYPE, sizeof(cl_device_type), (void*)&type, 0);
+	cl_int error = clGetDeviceInfo(*m_handle, CL_DEVICE_TYPE, sizeof(cl_device_type), (void*)&type, 0);
 	if(error != CL_SUCCESS) {
 		throw OpenclError(error, "Unable to retrieve device type");
 	}
@@ -74,13 +75,13 @@ unsigned long long OpenclDevice::getLocalMemorySize() const throw (OpenclError) 
 std::vector<std::size_t> OpenclDevice::getMaxWorkItemSizes() const throw (OpenclError) {
 	cl_int error;
 	cl_uint maxWorkItemDimensions;
-	error = clGetDeviceInfo(m_handle, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS , sizeof(cl_uint), (void*)&maxWorkItemDimensions, 0);
+	error = clGetDeviceInfo(*m_handle, CL_DEVICE_MAX_WORK_ITEM_DIMENSIONS , sizeof(cl_uint), (void*)&maxWorkItemDimensions, 0);
 	if(error != CL_SUCCESS) {
 		throw OpenclError(error, "Unable to retrieve device max work item dimensions");
 	}
 
 	std::unique_ptr<std::size_t[]> maxWorkItemSizes(new std::size_t[maxWorkItemDimensions]);
-	error = clGetDeviceInfo(m_handle, CL_DEVICE_MAX_WORK_ITEM_SIZES , sizeof(std::size_t) * maxWorkItemDimensions, (void*)maxWorkItemSizes.get(), 0);
+	error = clGetDeviceInfo(*m_handle, CL_DEVICE_MAX_WORK_ITEM_SIZES , sizeof(std::size_t) * maxWorkItemDimensions, (void*)maxWorkItemSizes.get(), 0);
 	if(error != CL_SUCCESS) {
 		throw OpenclError(error, "Unable to retrieve device max work item sizes");
 	}
@@ -88,26 +89,16 @@ std::vector<std::size_t> OpenclDevice::getMaxWorkItemSizes() const throw (Opencl
 	return std::vector<std::size_t>(maxWorkItemSizes.get(), maxWorkItemSizes.get() + maxWorkItemDimensions);
 }
 
-OpenclContext OpenclDevice::createContext() const throw (OpenclError) {
-	cl_int error;
-	cl_context context(clCreateContext(0, 1, &m_handle, 0, 0, &error));
-	if(error != CL_SUCCESS) {
-		throw OpenclError(error, "Unable to create the OpenCL context");
-	}
-
-	return OpenclContext(context);
-}
-
 std::string OpenclDevice::getInfoString(const cl_platform_info& p_paramName) const throw (OpenclError) {
 	cl_int error;
 	std::size_t size = 0;
-	error = clGetDeviceInfo(m_handle, p_paramName, 0, 0, &size);
+	error = clGetDeviceInfo(*m_handle, p_paramName, 0, 0, &size);
 	if(error != CL_SUCCESS) {
 		throw OpenclError(error, "Unable to retrieve device info size");
 	}
 
 	std::unique_ptr<char[]> buffer(new char[size]);
-	error = clGetDeviceInfo(m_handle, p_paramName, size, (void*)buffer.get(), 0);
+	error = clGetDeviceInfo(*m_handle, p_paramName, size, (void*)buffer.get(), 0);
 	if(error != CL_SUCCESS) {
 		throw OpenclError(error, "Unable to retrieve device info value");
 	}
@@ -117,7 +108,7 @@ std::string OpenclDevice::getInfoString(const cl_platform_info& p_paramName) con
 
 unsigned int OpenclDevice::getInfoUint(const cl_platform_info& p_paramName) const throw (OpenclError) {
 	cl_uint value = 0;
-	cl_int error = clGetDeviceInfo(m_handle, p_paramName , sizeof(cl_uint), (void*)&value, 0);
+	cl_int error = clGetDeviceInfo(*m_handle, p_paramName , sizeof(cl_uint), (void*)&value, 0);
 	if(error != CL_SUCCESS) {
 		throw OpenclError(error, "Unable to retrieve device info value");
 	}
@@ -127,7 +118,7 @@ unsigned int OpenclDevice::getInfoUint(const cl_platform_info& p_paramName) cons
 
 std::size_t OpenclDevice::getInfoSizet(const cl_platform_info& p_paramName) const throw (OpenclError) {
 	std::size_t value = 0;
-	cl_int error = clGetDeviceInfo(m_handle, p_paramName , sizeof(std::size_t), (void*)&value, 0);
+	cl_int error = clGetDeviceInfo(*m_handle, p_paramName , sizeof(std::size_t), (void*)&value, 0);
 	if(error != CL_SUCCESS) {
 		throw OpenclError(error, "Unable to retrieve device info value");
 	}
@@ -137,7 +128,7 @@ std::size_t OpenclDevice::getInfoSizet(const cl_platform_info& p_paramName) cons
 
 unsigned long long OpenclDevice::getInfoUlong(const cl_platform_info& p_paramName) const throw (OpenclError) {
 	cl_ulong value = 0;
-	cl_int error = clGetDeviceInfo(m_handle, p_paramName , sizeof(cl_ulong), (void*)&value, 0);
+	cl_int error = clGetDeviceInfo(*m_handle, p_paramName , sizeof(cl_ulong), (void*)&value, 0);
 	if(error != CL_SUCCESS) {
 		throw OpenclError(error, "Unable to retrieve device info value");
 	}
@@ -162,10 +153,11 @@ std::vector<std::shared_ptr<OpenclDevice>> OpenclDevice::list(const std::shared_
 	}
 
 	for(cl_uint i = 0 ; i < devicesNumber ; ++i) {
-		list.push_back(std::shared_ptr<OpenclDevice>(new OpenclDevice(devices[i])));
+		std::unique_ptr<cl_device_id> device(new cl_device_id(devices[i]));
+		list.push_back(std::shared_ptr<OpenclDevice>(new OpenclDevice(device)));
 	}
 
 	return list;
 }
 
-}
+}}

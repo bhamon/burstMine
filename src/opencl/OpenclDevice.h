@@ -8,20 +8,20 @@
 
 #include "OpenclError.h"
 #include "OpenclPlatform.h"
-#include "OpenclContext.h"
 
 namespace cryo {
+namespace opencl {
 
 class OpenclDevice {
 	private:
-		cl_device_id m_handle;
+		std::unique_ptr<cl_device_id> m_handle;
 
 	public:
-		OpenclDevice(const cl_device_id& p_handle) throw (OpenclError);
-		OpenclDevice(const OpenclDevice& p_other) = 0;
+		OpenclDevice(std::unique_ptr<cl_device_id>& p_handle) throw (OpenclError);
+		OpenclDevice(const OpenclDevice& p_other) = delete;
 		virtual ~OpenclDevice() throw ();
 
-		OpenclDevice& operator=(const OpenclDevice& p_other) = 0;
+		OpenclDevice& operator=(const OpenclDevice& p_other) = delete;
 
 		inline const cl_device_id& getHandle() const;
 
@@ -38,8 +38,6 @@ class OpenclDevice {
 		unsigned long long getLocalMemorySize() const throw (OpenclError);
 		std::vector<std::size_t> getMaxWorkItemSizes() const throw (OpenclError);
 
-		std::unique_ptr<OpenclContext> createContext() const throw (OpenclError);
-
 	private:
 		std::string getInfoString(const cl_platform_info& p_paramName) const throw (OpenclError);
 		unsigned int getInfoUint(const cl_platform_info& p_paramName) const throw (OpenclError);
@@ -50,14 +48,15 @@ class OpenclDevice {
 		static std::vector<std::shared_ptr<OpenclDevice>> list(const std::shared_ptr<OpenclPlatform>& p_platform) throw (OpenclError);
 };
 
-}
+}}
 
 namespace cryo {
+namespace opencl {
 
 inline const cl_device_id& OpenclDevice::getHandle() const {
-	return m_handle;
+	return *m_handle;
 }
 
-}
+}}
 
 #endif

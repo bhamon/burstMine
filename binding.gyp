@@ -1,0 +1,33 @@
+{
+	"targets":[
+		{
+			"target_name":"opencl",
+			"include_dirs":[
+				"deps/opencl/include",
+			],
+			"sources":[
+				"src/opencl/OpenclPlatform.cpp",
+				"src/opencl/OpenclDevice.cpp",
+				"src/opencl/OpenclContext.cpp",
+				"src/opencl/OpenclCommandQueue.cpp",
+				"src/opencl/OpenclBuffer.cpp",
+				"src/opencl/OpenclProgram.cpp",
+				"src/opencl/OpenclKernel.cpp",
+				"src/opencl/OpenclError.cpp",
+				"src/burstMine/opencl/js/JsOpencl.cpp"
+			],
+			"conditions":[
+				["OS == 'win' and target_arch == 'x64'", {
+					"link_settings":{
+						"library_dirs":[
+							"deps/opencl/lib/win/x64"
+						],
+						"libraries":[
+							"libOpenCL.a"
+						]
+					}
+				}]
+			]
+		}
+	]
+}

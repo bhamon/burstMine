@@ -2,11 +2,18 @@
 #define CRYO_OPENCL_CONTEXT_H
 
 #include <memory>
+#include <vector>
+#include <exception>
 #include <CL/cl.h>
 
+#include "OpenclDevice.h"
+#include "OpenclCommandQueue.h"
+#include "OpenclBuffer.h"
+#include "OpenclProgram.h"
 #include "OpenclError.h"
 
 namespace cryo {
+namespace opencl {
 
 enum OpenclMemFlag {
 	ReadWrite = CL_MEM_READ_WRITE,
@@ -18,31 +25,38 @@ enum OpenclMemFlag {
 };
 
 class OpenclContext {
+	public:
+		std::unique_ptr<OpenclContext> create(const std::vector<std::shared_ptr<OpenclDevice>>& p_devices);
+
 	private:
-		cl_context m_context;
+		std::unique_ptr<cl_context> m_handle;
 
 	public:
-		OpenclContext(const cl_context& p_handle);
-		OpenclContext(const OpenclContext& p_other);
+		OpenclContext(std::unique_ptr<cl_context>& p_handle);
+		OpenclContext(const OpenclContext& p_other) = delete;
 		virtual ~OpenclContext() throw ();
 
-		OpenclContext& operator=(const OpenclContext& p_other);
+		OpenclContext& operator=(const OpenclContext& p_other) = delete;
 
 		inline const cl_context& getHandle() const;
 
-		std::unique_ptr<OpenclCommandQueue> createCommandQueue(const OpenclDevice& p_device) const throw (OpenclError);
+		std::unique_ptr<OpenclCommandQueue> createCommandQueue(const std::shared_ptr<OpenclDevice>& p_device) const throw (OpenclError);
 		std::unique_ptr<OpenclBuffer> createBuffer(OpenclMemFlag p_flags, std::size_t p_size, void* p_hostPointer = 0) const throw (OpenclError);
-		std::unique_ptr<OpenclProgram> createProgram(std::string p_file, std::string p_includePath = "") const throw (OpenclError);
+		std::unique_ptr<OpenclProgram> createProgram(const std::shared_ptr<OpenclDevice>& p_device, std::string p_file, std::string p_includePath = "") const throw (std::exception, OpenclError);
+
+	private:
+		std::string loadSource(const std::string& p_file) const throw (std::exception);
 };
 
-}
+}}
 
 namespace cryo {
+namespace opencl {
 
-inline const cl_platform_id& OpenclContext::getHandle() const {
-	return m_handle;
+inline const cl_context& OpenclContext::getHandle() const {
+	return *m_handle;
 }
 
-}
+}}
 
 #endif

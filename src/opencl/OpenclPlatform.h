@@ -9,17 +9,18 @@
 #include "OpenclError.h"
 
 namespace cryo {
+namespace opencl {
 
 class OpenclPlatform {
 	private:
-		cl_platform_id m_handle;
+		std::unique_ptr<cl_platform_id> m_handle;
 
 	public:
-		OpenclPlatform(const cl_platform_id& p_handle);
-		OpenclPlatform(const OpenclPlatform& p_other);
+		OpenclPlatform(std::unique_ptr<cl_platform_id>& p_handle);
+		OpenclPlatform(const OpenclPlatform& p_other) = delete;
 		virtual ~OpenclPlatform() throw ();
 
-		OpenclPlatform& operator=(const OpenclPlatform& p_other);
+		OpenclPlatform& operator=(const OpenclPlatform& p_other) = delete;
 
 		inline const cl_platform_id& getHandle() const;
 
@@ -34,14 +35,15 @@ class OpenclPlatform {
 		static std::vector<std::shared_ptr<OpenclPlatform>> list() throw (OpenclError);
 };
 
-}
+}}
 
 namespace cryo {
+namespace opencl {
 
 inline const cl_platform_id& OpenclPlatform::getHandle() const {
-	return m_handle;
+	return *m_handle;
 }
 
-}
+}}
 
 #endif
