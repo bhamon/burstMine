@@ -22,7 +22,7 @@ class OpenclKernel {
 
 		inline const cl_kernel& getHandle() const;
 
-		void setKernelArgument(unsigned int p_index, std::size_t p_size, void* p_value) throw (OpenclError);
+		void setArgument(unsigned int p_index, std::size_t p_size, void* p_value) throw (OpenclError);
 };
 
 }}

@@ -102,7 +102,7 @@ inline void DeviceConfig::setHashesNumber(unsigned int p_hashesNumber) {
 }
 
 inline unsigned long long DeviceConfig::getBufferSize() const {
-	return m_globalWorkSize * cryo::burstMine::GEN_SIZE;
+	return m_globalWorkSize * GEN_SIZE;
 }
 
 }}

@@ -6,6 +6,9 @@
 	Burst: BURST-YA29-QCEW-QXC3-BKXDL
 */
 
+#include <vector>
+#include <stdexcept>
+
 #include "constants.h"
 #include "Context.h"
 
@@ -13,96 +16,46 @@ namespace cryo {
 namespace burstMine {
 namespace opencl {
 
-Context::Context(const std::shared_ptr<OpenclDeviceConfig>& p_config, const std::shared_ptr<cryo::opencl::OpenclDevice>& p_device) throw (std::exception, cryo::opencl::OpenclError)
-: m_config(p_config), m_device(p_device) {
-	m_bufferCpu = new unsigned char[m_config->getBufferSize()];
-
-	cl_int error;
-
-	m_context = clCreateContext(0, 1, &m_device->getHandle(), NULL, NULL, &error);
-	if(error != CL_SUCCESS) {
-		throw OpenclError(error, "Unable to create the OpenCL context");
+Context::Context(const std::shared_ptr<OpenclDeviceConfig>& p_config) throw (std::exception, cryo::opencl::OpenclError)
+: m_config(p_config) {
+	m_config->normalize();
+	if(m_config->getGobalWorkSize() == 0) {
+		throw std::runtime_error("Global work size can't be null");
+	} else if(m_config->getLocalWorkSize() == 0) {
+		throw std::runtime_error("Local work size can't be null");
 	}
 
-	m_commandQueue = clCreateCommandQueue(m_context, m_device->getHandle(), 0, &error);
-	if(error != CL_SUCCESS) {
-		throw OpenclError(error, "Unable to create the OpenCL command queue");
+	m_bufferCpu = new unsigned char[m_config->getGlobalWorkSize() * cryo::burstMine::PLOT_SIZE];
+
+	std::vector<std::shared_ptr<cryo::opencl::OpenclPlatform>> platforms(cryo::opencl::OpenclPlatform::list());
+	if(p_config->getPlatform() >= platforms.size()) {
+		throw std::runtime_error("Invalid platform index");
 	}
 
-	m_bufferDevice = clCreateBuffer(m_context, CL_MEM_READ_WRITE, sizeof(unsigned char) * m_config->getGlobalWorkSize() * GEN_SIZE, 0, &error);
-	if(error != CL_SUCCESS) {
-		throw OpenclError(error, "Unable to create the OpenCL GPU buffer");
+	m_platform = platforms[p_config->getPlatform()];
+
+	std::vector<std::shared_ptr<cryo::opencl::OpenclDevice>> devices(cryo::opencl::OpenclDevice::list(m_platform));
+	if(p_config->getDevice() >= devices.size()) {
+		throw std::runtime_error("Invalid device index");
 	}
 
-	std::string source(loadSource(KERNEL_PATH + "/nonce.cl"));
-	const char* sources[] = {source.c_str()};
-	std::size_t sourcesLength[] = {source.length()};
-	m_program = clCreateProgramWithSource(m_context, 1, sources, sourcesLength, &error);
-	if(error != CL_SUCCESS) {
-		throw OpenclError(error, "Unable to create the OpenCL program");
-	}
+	m_device = devices[p_config->getDevice()];
+	m_context = cryo::opencl::OpenclContext::create(m_device);
+	m_commandQueue = m_context->createCommandQueue(m_device);
+	m_bufferDevice = m_context->createBuffer(cryo::opencl::OpenclMemFlag::ReadWrite, m_config->getGlobalWorkSize() * GEN_SIZE);
+	m_program = m_context->createProgram(m_device, KERNEL_PATH + "/nonce.cl", KERNEL_PATH);
 
-	std::string includePath("-I " + KERNEL_PATH);
-	error = clBuildProgram(m_program, 1, &m_device->getHandle(), includePath.c_str(), 0, 0);
-	if(error != CL_SUCCESS) {
-		std::size_t logSize;
-		cl_int subError = clGetProgramBuildInfo(m_program, m_device->getHandle(), CL_PROGRAM_BUILD_LOG, 0, 0, &logSize);
-		if(subError != CL_SUCCESS) {
-			throw OpenclError(subError, "Unable to retrieve the OpenCL build info size");
-		}
+	m_kernels[0] = m_program->createKernel("nonce_step1");
+	m_kernels[0]->setArgument(0, sizeof(cl_mem), &m_bufferDevice->getHandle());
 
-		std::unique_ptr<char[]> log(new char[logSize]);
-		subError = clGetProgramBuildInfo(m_program, m_device->getHandle(), CL_PROGRAM_BUILD_LOG, logSize, (void*)log.get(), 0);
-		if(subError != CL_SUCCESS) {
-			throw OpenclError(subError, "Unable to retrieve the OpenCL build info");
-		}
+	m_kernels[1] = m_program->createKernel("nonce_step2");
+	m_kernels[1]->setArgument(0, sizeof(cl_mem), &m_bufferDevice->getHandle());
 
-		std::ostringstream message;
-		message << "Unable to build the OpenCL program" << std::endl;
-		message << log.get();
-
-		throw OpenclError(error, message.str());
-	}
-
-	m_kernels[0] = clCreateKernel(m_program, "nonce_step1", &error);
-	if(error != CL_SUCCESS) {
-		throw OpenclError(error, "Unable to create the OpenCL step1 kernel");
-	}
-
-	error = clSetKernelArg(m_kernels[0], 0, sizeof(cl_mem), (void*)&m_bufferDevice);
-	if(error != CL_SUCCESS) {
-		throw OpenclError(error, "Unable to set the OpenCL step1 kernel arguments");
-	}
-
-	m_kernels[1] = clCreateKernel(m_program, "nonce_step2", &error);
-	if(error != CL_SUCCESS) {
-		throw OpenclError(error, "Unable to create the OpenCL step2 kernel");
-	}
-
-	error = clSetKernelArg(m_kernels[1], 0, sizeof(cl_mem), (void*)&m_bufferDevice);
-	if(error != CL_SUCCESS) {
-		throw OpenclError(error, "Unable to set the OpenCL step2 kernel arguments");
-	}
-
-	m_kernels[2] = clCreateKernel(m_program, "nonce_step3", &error);
-	if(error != CL_SUCCESS) {
-		throw OpenclError(error, "Unable to create the OpenCL step3 kernel");
-	}
-
-	error = clSetKernelArg(m_kernels[2], 0, sizeof(cl_mem), (void*)&m_bufferDevice);
-	if(error != CL_SUCCESS) {
-		throw OpenclError(error, "Unable to set the OpenCL step3 kernel arguments");
-	}
-}
-
-Context::Context(const Context& p_other) {
+	m_kernels[2] = m_program->createKernel("nonce_step3");
+	m_kernels[2]->setArgument(0, sizeof(cl_mem), &m_bufferDevice->getHandle());
 }
 
 Context::~Context() {
-}
-
-Context& Context::operator=(const Context& p_other) {
-	return *this;
 }
 
 void generatePlots(unsigned long long p_address, unsigned long long p_offset, unsigned int p_nb) throw (std::exception, OpenclError) {

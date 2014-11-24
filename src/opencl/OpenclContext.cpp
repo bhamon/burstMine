@@ -24,6 +24,12 @@ std::unique_ptr<OpenclContext> OpenclContext::create(const std::vector<std::shar
 	return std::unique_ptr<OpenclContext>(new OpenclContext(context));
 }
 
+std::unique_ptr<OpenclContext> OpenclContext::create(const std::shared_ptr<OpenclDevice>& p_device) {
+	std::vector<std::shared_ptr<OpenclDevice>> devices;
+	devices.push_back(device);
+	return create(devices);
+}
+
 OpenclContext::OpenclContext(std::unique_ptr<cl_context>& p_handle)
 : m_handle(std::move(p_handle)) {
 }
