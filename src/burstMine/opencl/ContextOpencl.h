@@ -10,6 +10,7 @@
 #define CRYO_BURST_MINE_OPENCL_CONTEXT_OPENCL_H
 
 #include <memory>
+#include <vector>
 #include <exception>
 #include <CL/CL.h>
 
@@ -30,14 +31,14 @@ namespace opencl {
 class ContextOpencl {
 	private:
 		std::shared_ptr<OpenclDeviceConfig> m_config;
-		unsigned char* m_bufferCpu;
-		std::shared_ptr<cryo::opencl::OpenclDevice> m_platform;
+		std::unique_ptr<unsigned char[]> m_bufferCpu;
+		std::shared_ptr<cryo::opencl::OpenclPlatform> m_platform;
 		std::shared_ptr<cryo::opencl::OpenclDevice> m_device;
-		std::unique_ptr<cryo::opencl::OpenclContext> m_context;
-		std::unique_ptr<cryo::opencl::OpenclCommandQueue> m_commandQueue;
-		std::unique_ptr<cryo::opencl::OpenclBuffer> m_bufferDevice;
-		std::unique_ptr<cryo::opencl::OpenclProgram> m_program;
-		std::unique_ptr<cryo::opencl::OpenclKernel> m_kernels[3];
+		std::shared_ptr<cryo::opencl::OpenclContext> m_context;
+		std::shared_ptr<cryo::opencl::OpenclCommandQueue> m_commandQueue;
+		std::shared_ptr<cryo::opencl::OpenclBuffer> m_bufferDevice;
+		std::shared_ptr<cryo::opencl::OpenclProgram> m_program;
+		std::vector<std::shared_ptr<cryo::opencl::OpenclKernel>> m_kernels;
 
 	public:
 		ContextOpencl(const std::shared_ptr<OpenclDeviceConfig>& p_config) throw (std::exception, cryo::opencl::OpenclError);
@@ -46,7 +47,8 @@ class ContextOpencl {
 
 		ContextOpencl& operator=(const ContextOpencl& p_other) = delete;
 
-		void generatePlots(unsigned long long p_address, unsigned long long p_offset, unsigned int p_nb) throw (std::exception, cryo::opencl::OpenclError);
+		void computePlots(unsigned long long p_address, unsigned long long p_offset, unsigned int p_workSize) throw (std::exception, cryo::opencl::OpenclError);
+		void bufferPlots(unsigned int p_workSize) throw (cryo::opencl::OpenclError);
 };
 
 }}}

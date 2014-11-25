@@ -14,7 +14,10 @@
 				"src/opencl/OpenclProgram.cpp",
 				"src/opencl/OpenclKernel.cpp",
 				"src/opencl/OpenclError.cpp",
-				"src/burstMine/opencl/js/JsOpencl.cpp"
+				"src/burstMine/opencl/ContextOpencl.cpp",
+				"src/burstMine/opencl/OpenclDeviceConfig.cpp",
+				"src/burstMine/opencl/js/JsOpencl.cpp",
+				"src/burstMine/opencl/js/JsContextOpencl.cpp"
 			],
 			"conditions":[
 				["OS == 'win' and target_arch == 'x64'", {

@@ -2,7 +2,13 @@
 #define CRYO_OPENCL_COMMAND_QUEUE_H
 
 #include <memory>
+#include <vector>
+#include <exception>
 #include <CL/cl.h>
+
+#include "OpenclKernel.h"
+#include "OpenclBuffer.h"
+#include "OpenclError.h"
 
 namespace cryo {
 namespace opencl {
@@ -19,6 +25,12 @@ class OpenclCommandQueue {
 		OpenclCommandQueue& operator=(const OpenclCommandQueue& p_other) = delete;
 
 		inline const cl_command_queue& getHandle() const;
+
+		void enqueueNDRangeKernel(const std::shared_ptr<OpenclKernel>& p_kernel, const std::vector<std::size_t>& p_globalWorkSizes, const std::vector<std::size_t>& p_localWorkSizes) throw (std::exception, OpenclError);
+		void enqueueNDRangeKernel(const std::shared_ptr<OpenclKernel>& p_kernel, std::size_t p_globalWorkSize, std::size_t p_localWorkSize) throw (std::exception, OpenclError);
+		void enqueueReadBuffer(const std::shared_ptr<OpenclBuffer>& p_bufferDevice, std::size_t p_offset, std::size_t p_size, unsigned char* p_bufferCpu) throw (OpenclError);
+		void flush();
+		void finish();
 };
 
 }}

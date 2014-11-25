@@ -26,7 +26,7 @@ std::unique_ptr<OpenclContext> OpenclContext::create(const std::vector<std::shar
 
 std::unique_ptr<OpenclContext> OpenclContext::create(const std::shared_ptr<OpenclDevice>& p_device) {
 	std::vector<std::shared_ptr<OpenclDevice>> devices;
-	devices.push_back(device);
+	devices.push_back(p_device);
 	return create(devices);
 }
 

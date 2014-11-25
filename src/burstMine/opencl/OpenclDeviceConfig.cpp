@@ -2,24 +2,24 @@
 #include <algorithm>
 #include <memory>
 
-#include "DeviceConfig.h"
+#include "OpenclDeviceConfig.h"
 
 namespace cryo {
 namespace burstMine {
 namespace opencl {
 
-DeviceConfig::DeviceConfig(std::size_t p_platform, std::size_t p_device, std::size_t p_globalWorkSize, std::size_t p_localWorkSize, unsigned int p_hashesNumber)
+OpenclDeviceConfig::OpenclDeviceConfig(std::size_t p_platform, std::size_t p_device, std::size_t p_globalWorkSize, std::size_t p_localWorkSize, unsigned int p_hashesNumber)
 : m_platform(p_platform), m_device(p_device), m_globalWorkSize(p_globalWorkSize), m_localWorkSize(p_localWorkSize), m_hashesNumber(p_hashesNumber) {
 }
 
-DeviceConfig::DeviceConfig(const DeviceConfig& p_other)
+OpenclDeviceConfig::OpenclDeviceConfig(const OpenclDeviceConfig& p_other)
 : m_platform(p_other.m_platform), m_device(p_other.m_device), m_globalWorkSize(p_other.m_globalWorkSize), m_localWorkSize(p_other.m_localWorkSize), m_hashesNumber(p_other.m_hashesNumber) {
 }
 
-DeviceConfig::~DeviceConfig() throw () {
+OpenclDeviceConfig::~OpenclDeviceConfig() throw () {
 }
 
-DeviceConfig& DeviceConfig::operator=(const DeviceConfig& p_other) {
+OpenclDeviceConfig& OpenclDeviceConfig::operator=(const OpenclDeviceConfig& p_other) {
 	m_platform = p_other.m_platform;
 	m_device = p_other.m_device;
 	m_globalWorkSize = p_other.m_globalWorkSize;
@@ -29,7 +29,7 @@ DeviceConfig& DeviceConfig::operator=(const DeviceConfig& p_other) {
 	return *this;
 }
 
-void DeviceConfig::normalize() {
+void OpenclDeviceConfig::normalize() {
 	if(m_localWorkSize > m_globalWorkSize) {
 		m_localWorkSize = m_globalWorkSize;
 	}

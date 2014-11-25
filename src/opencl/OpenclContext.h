@@ -26,8 +26,8 @@ enum OpenclMemFlag {
 
 class OpenclContext {
 	public:
-		std::unique_ptr<OpenclContext> create(const std::vector<std::shared_ptr<OpenclDevice>>& p_devices);
-		std::unique_ptr<OpenclContext> create(const std::shared_ptr<OpenclDevice>& p_device);
+		static std::unique_ptr<OpenclContext> create(const std::vector<std::shared_ptr<OpenclDevice>>& p_devices);
+		static std::unique_ptr<OpenclContext> create(const std::shared_ptr<OpenclDevice>& p_device);
 
 	private:
 		std::unique_ptr<cl_context> m_handle;

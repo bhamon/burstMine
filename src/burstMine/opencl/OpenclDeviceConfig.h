@@ -6,8 +6,8 @@
 	Burst: BURST-YA29-QCEW-QXC3-BKXDL
 */
 
-#ifndef CRYO_BURST_MINE_OPENCL_DEVICE_CONFIG_H
-#define CRYO_BURST_MINE_OPENCL_DEVICE_CONFIG_H
+#ifndef CRYO_BURST_MINE_OPENCL_OPENCL_DEVICE_CONFIG_H
+#define CRYO_BURST_MINE_OPENCL_OPENCL_DEVICE_CONFIG_H
 
 #include <string>
 #include <vector>
@@ -17,7 +17,7 @@ namespace cryo {
 namespace burstMine {
 namespace opencl {
 
-class DeviceConfig {
+class OpenclDeviceConfig {
 	private:
 		std::size_t m_platform;
 		std::size_t m_device;
@@ -26,12 +26,11 @@ class DeviceConfig {
 		unsigned int m_hashesNumber;
 
 	public:
-		DeviceConfig(std::size_t p_platform, std::size_t p_device, std::size_t p_globalWorkSize, std::size_t p_localWorkSize, unsigned int p_hashesNumber);
-		DeviceConfig(const DeviceConfig& p_other);
+		OpenclDeviceConfig(std::size_t p_platform, std::size_t p_device, std::size_t p_globalWorkSize, std::size_t p_localWorkSize, unsigned int p_hashesNumber);
+		OpenclDeviceConfig(const OpenclDeviceConfig& p_other);
+		virtual ~OpenclDeviceConfig() throw ();
 
-		virtual ~DeviceConfig() throw ();
-
-		DeviceConfig& operator=(const DeviceConfig& p_other);
+		OpenclDeviceConfig& operator=(const OpenclDeviceConfig& p_other);
 
 		inline std::size_t getPlatform() const;
 		inline std::size_t getDevice() const;
@@ -50,61 +49,62 @@ class DeviceConfig {
 		void normalize();
 };
 
-}}
+}}}
 
 #include "constants.h"
 
 namespace cryo {
 namespace burstMine {
+namespace opencl {
 
-inline std::size_t DeviceConfig::getPlatform() const {
+inline std::size_t OpenclDeviceConfig::getPlatform() const {
 	return m_platform;
 }
 
-inline std::size_t DeviceConfig::getDevice() const {
+inline std::size_t OpenclDeviceConfig::getDevice() const {
 	return m_device;
 }
 
-inline std::size_t DeviceConfig::getGlobalWorkSize() const {
+inline std::size_t OpenclDeviceConfig::getGlobalWorkSize() const {
 	return m_globalWorkSize;
 }
 
-inline std::size_t DeviceConfig::getLocalWorkSize() const {
+inline std::size_t OpenclDeviceConfig::getLocalWorkSize() const {
 	return m_localWorkSize;
 }
 
-inline unsigned int DeviceConfig::getHashesNumber() const {
+inline unsigned int OpenclDeviceConfig::getHashesNumber() const {
 	return m_hashesNumber;
 }
 
-inline void DeviceConfig::setGlobalWorkSize(std::size_t p_globalWorkSize) {
+inline void OpenclDeviceConfig::setGlobalWorkSize(std::size_t p_globalWorkSize) {
 	m_globalWorkSize = p_globalWorkSize;
 }
 
-inline void DeviceConfig::setLocalWorkSize(std::size_t p_localWorkSize) {
+inline void OpenclDeviceConfig::setLocalWorkSize(std::size_t p_localWorkSize) {
 	m_localWorkSize = p_localWorkSize;
 }
 
-inline std::size_t& DeviceConfig::globalWorkSize() {
+inline std::size_t& OpenclDeviceConfig::globalWorkSize() {
 	return m_globalWorkSize;
 }
 
-inline std::size_t& DeviceConfig::localWorkSize() {
+inline std::size_t& OpenclDeviceConfig::localWorkSize() {
 	return m_localWorkSize;
 }
 
-inline unsigned int& DeviceConfig::hashesNumber() {
+inline unsigned int& OpenclDeviceConfig::hashesNumber() {
 	return m_hashesNumber;
 }
 
-inline void DeviceConfig::setHashesNumber(unsigned int p_hashesNumber) {
+inline void OpenclDeviceConfig::setHashesNumber(unsigned int p_hashesNumber) {
 	m_hashesNumber = p_hashesNumber;
 }
 
-inline unsigned long long DeviceConfig::getBufferSize() const {
+inline unsigned long long OpenclDeviceConfig::getBufferSize() const {
 	return m_globalWorkSize * GEN_SIZE;
 }
 
-}}
+}}}
 
 #endif
