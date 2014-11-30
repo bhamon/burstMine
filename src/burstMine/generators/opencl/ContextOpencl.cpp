@@ -6,6 +6,7 @@
 	Burst: BURST-YA29-QCEW-QXC3-BKXDL
 */
 
+#include <memory>
 #include <vector>
 #include <stdexcept>
 
@@ -14,36 +15,37 @@
 
 namespace cryo {
 namespace burstMine {
+namespace generators {
 namespace opencl {
 
-ContextOpencl::ContextOpencl(const std::shared_ptr<OpenclDeviceConfig>& p_config) throw (std::exception, cryo::opencl::OpenclError)
+ContextOpencl::ContextOpencl(const ContextOpenclConfig& p_config) throw (std::exception, cryo::opencl::OpenclError)
 : m_config(p_config) {
-	m_config->normalize();
-	if(m_config->getGlobalWorkSize() == 0) {
+	m_config.normalize();
+	if(m_config.getGlobalWorkSize() == 0) {
 		throw std::runtime_error("Global work size can't be null");
-	} else if(m_config->getLocalWorkSize() == 0) {
+	} else if(m_config.getLocalWorkSize() == 0) {
 		throw std::runtime_error("Local work size can't be null");
 	}
 
-	m_bufferCpu = std::unique_ptr<unsigned char[]>(new unsigned char[m_config->getGlobalWorkSize() * cryo::burstMine::PLOT_SIZE]);
+	m_bufferCpu = std::unique_ptr<unsigned char[]>(new unsigned char[m_config.getGlobalWorkSize() * cryo::burstMine::PLOT_SIZE]);
 
-	std::vector<std::shared_ptr<cryo::opencl::OpenclPlatform>> platforms(cryo::opencl::OpenclPlatform::list());
-	if(p_config->getPlatform() >= platforms.size()) {
+	std::vector<cryo::opencl::OpenclPlatform> platforms(cryo::opencl::OpenclPlatform::list());
+	if(m_config.getPlatform() >= platforms.size()) {
 		throw std::runtime_error("Invalid platform index");
 	}
 
-	m_platform = platforms[p_config->getPlatform()];
+	m_platform = std::unique_ptr<cryo::opencl::OpenclPlatform>(new cryo::opencl::OpenclPlatform(platforms[m_config.getPlatform()]));
 
-	std::vector<std::shared_ptr<cryo::opencl::OpenclDevice>> devices(cryo::opencl::OpenclDevice::list(m_platform));
-	if(p_config->getDevice() >= devices.size()) {
+	std::vector<cryo::opencl::OpenclDevice> devices(cryo::opencl::OpenclDevice::list(*m_platform));
+	if(m_config.getDevice() >= devices.size()) {
 		throw std::runtime_error("Invalid device index");
 	}
 
-	m_device = devices[p_config->getDevice()];
-	m_context = cryo::opencl::OpenclContext::create(m_device);
-	m_commandQueue = m_context->createCommandQueue(m_device);
-	m_bufferDevice = m_context->createBuffer(cryo::opencl::OpenclMemFlag::ReadWrite, m_config->getGlobalWorkSize() * GEN_SIZE);
-	m_program = m_context->createProgram(m_device, KERNEL_PATH + "/nonce.cl", KERNEL_PATH);
+	m_device = std::unique_ptr<cryo::opencl::OpenclDevice>(new cryo::opencl::OpenclDevice(devices[m_config.getDevice()]));
+	m_context = cryo::opencl::OpenclContext::create(*m_device);
+	m_commandQueue = m_context->createCommandQueue(*m_device);
+	m_bufferDevice = m_context->createBuffer(cryo::opencl::OpenclMemFlag::ReadWrite, m_config.getGlobalWorkSize() * GEN_SIZE);
+	m_program = m_context->createProgram(*m_device, m_config.getKernelsPath() + "/nonce.cl", m_config.getKernelsPath());
 
 	m_kernels.push_back(m_program->createKernel("nonce_step1"));
 	m_kernels.push_back(m_program->createKernel("nonce_step2"));
@@ -58,7 +60,7 @@ ContextOpencl::~ContextOpencl() {
 }
 
 void ContextOpencl::computePlots(unsigned long long p_address, unsigned long long p_offset, unsigned int p_workSize) throw (std::exception, cryo::opencl::OpenclError) {
-	if(p_workSize > m_config->getGlobalWorkSize()) {
+	if(p_workSize > m_config.getGlobalWorkSize()) {
 		throw std::runtime_error("Global work size too low for the requested work size");
 	}
 
@@ -66,9 +68,9 @@ void ContextOpencl::computePlots(unsigned long long p_address, unsigned long lon
 	m_kernels[0]->setArgument(2, sizeof(unsigned long long), static_cast<void*>(&p_address));
 	m_kernels[0]->setArgument(3, sizeof(unsigned long long), static_cast<void*>(&p_offset));
 
-	m_commandQueue->enqueueNDRangeKernel(m_kernels[0], m_config->getGlobalWorkSize(), m_config->getLocalWorkSize());
+	m_commandQueue->enqueueNDRangeKernel(*m_kernels[0], m_config.getGlobalWorkSize(), m_config.getLocalWorkSize());
 
-	unsigned int hashesNumber = m_config->getHashesNumber();
+	unsigned int hashesNumber = m_config.getHashesNumber();
 	unsigned int hashesSize = hashesNumber * cryo::burstMine::HASH_SIZE;
 	for(unsigned int i = 0 ; i < cryo::burstMine::PLOT_SIZE ; i += hashesSize) {
 		unsigned int hashesOffset = cryo::burstMine::PLOT_SIZE - i;
@@ -78,19 +80,19 @@ void ContextOpencl::computePlots(unsigned long long p_address, unsigned long lon
 		m_kernels[1]->setArgument(3, sizeof(unsigned int), static_cast<void*>(&hashesOffset));
 		m_kernels[1]->setArgument(4, sizeof(unsigned int), static_cast<void*>(&hashesNumber));
 
-		m_commandQueue->enqueueNDRangeKernel(m_kernels[1], m_config->getGlobalWorkSize(), m_config->getLocalWorkSize());
+		m_commandQueue->enqueueNDRangeKernel(*m_kernels[1], m_config.getGlobalWorkSize(), m_config.getLocalWorkSize());
 //		m_commandQueue->finish();
 	}
 
 	m_kernels[2]->setArgument(1, sizeof(unsigned int), static_cast<void*>(&p_workSize));
 
-	m_commandQueue->enqueueNDRangeKernel(m_kernels[2], m_config->getGlobalWorkSize(), m_config->getLocalWorkSize());
+	m_commandQueue->enqueueNDRangeKernel(*m_kernels[2], m_config.getGlobalWorkSize(), m_config.getLocalWorkSize());
 // useful???
 //	m_commandQueue->finish();
 }
 
 void ContextOpencl::bufferPlots(unsigned int p_workSize) throw (std::exception, cryo::opencl::OpenclError) {
-	if(p_workSize > m_config->getGlobalWorkSize()) {
+	if(p_workSize > m_config.getGlobalWorkSize()) {
 		throw std::runtime_error("Global work size too low for the requested work size");
 	}
 
@@ -101,7 +103,7 @@ m_commandQueue->finish();
 	std::size_t offsetGpu = 0;
 	std::size_t offsetCpu = 0;
 	for(unsigned int i = 0 ; i < p_workSize ; ++i, offsetGpu += GEN_SIZE, offsetCpu += PLOT_SIZE) {
-		m_commandQueue->enqueueReadBuffer(m_bufferDevice, sizeof(unsigned char) * offsetGpu, sizeof(unsigned char) * PLOT_SIZE, m_bufferCpu.get() + offsetCpu);
+		m_commandQueue->enqueueReadBuffer(*m_bufferDevice, sizeof(unsigned char) * offsetGpu, sizeof(unsigned char) * PLOT_SIZE, m_bufferCpu.get() + offsetCpu);
 	}
 
 // TEST
@@ -109,4 +111,4 @@ m_commandQueue->finish();
 // TEST
 }
 
-}}}
+}}}}

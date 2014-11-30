@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <memory>
 #include <CL/cl.h>
 
 #include "OpenclError.h"
@@ -13,14 +12,14 @@ namespace opencl {
 
 class OpenclPlatform {
 	private:
-		std::unique_ptr<cl_platform_id> m_handle;
+		cl_platform_id m_handle;
 
 	public:
-		OpenclPlatform(std::unique_ptr<cl_platform_id>& p_handle);
-		OpenclPlatform(const OpenclPlatform& p_other) = delete;
+		OpenclPlatform(const cl_platform_id& p_handle);
+		OpenclPlatform(const OpenclPlatform& p_other);
 		virtual ~OpenclPlatform() throw ();
 
-		OpenclPlatform& operator=(const OpenclPlatform& p_other) = delete;
+		OpenclPlatform& operator=(const OpenclPlatform& p_other);
 
 		inline const cl_platform_id& getHandle() const;
 
@@ -32,7 +31,7 @@ class OpenclPlatform {
 		std::string getInfoString(const cl_platform_info& p_paramName) const throw (OpenclError);
 
 	public:
-		static std::vector<std::shared_ptr<OpenclPlatform>> list() throw (OpenclError);
+		static std::vector<OpenclPlatform> list() throw (OpenclError);
 };
 
 }}
@@ -41,7 +40,7 @@ namespace cryo {
 namespace opencl {
 
 inline const cl_platform_id& OpenclPlatform::getHandle() const {
-	return *m_handle;
+	return m_handle;
 }
 
 }}

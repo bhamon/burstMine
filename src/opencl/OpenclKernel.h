@@ -1,7 +1,6 @@
 #ifndef CRYO_OPENCL_KERNEL_H
 #define CRYO_OPENCL_KERNEL_H
 
-#include <memory>
 #include <CL/cl.h>
 
 #include "OpenclError.h"
@@ -11,10 +10,10 @@ namespace opencl {
 
 class OpenclKernel {
 	private:
-		std::unique_ptr<cl_kernel> m_handle;
+		cl_kernel m_handle;
 
 	public:
-		OpenclKernel(std::unique_ptr<cl_kernel>& p_handle);
+		OpenclKernel(const cl_kernel& p_handle);
 		OpenclKernel(const OpenclKernel& p_other) = delete;
 		virtual ~OpenclKernel() throw ();
 
@@ -31,7 +30,7 @@ namespace cryo {
 namespace opencl {
 
 inline const cl_kernel& OpenclKernel::getHandle() const {
-	return *m_handle;
+	return m_handle;
 }
 
 }}

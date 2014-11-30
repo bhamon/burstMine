@@ -12,10 +12,10 @@ namespace opencl {
 
 class OpenclProgram {
 	private:
-		std::unique_ptr<cl_program> m_handle;
+		cl_program m_handle;
 
 	public:
-		OpenclProgram(std::unique_ptr<cl_program>& p_handle);
+		OpenclProgram(const cl_program& p_handle);
 		OpenclProgram(const OpenclProgram& p_other) = delete;
 		virtual ~OpenclProgram() throw ();
 
@@ -32,7 +32,7 @@ namespace cryo {
 namespace opencl {
 
 inline const cl_program& OpenclProgram::getHandle() const {
-	return *m_handle;
+	return m_handle;
 }
 
 }}

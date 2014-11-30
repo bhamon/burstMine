@@ -3,12 +3,12 @@
 namespace cryo {
 namespace opencl {
 
-OpenclBuffer::OpenclBuffer(std::unique_ptr<cl_mem>& p_handle)
-: m_handle(std::move(p_handle)) {
+OpenclBuffer::OpenclBuffer(const cl_mem& p_handle)
+: m_handle(p_handle) {
 }
 
 OpenclBuffer::~OpenclBuffer() throw () {
-	clReleaseMemObject(*m_handle);
+	clReleaseMemObject(m_handle);
 }
 
 }}

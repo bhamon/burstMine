@@ -1,7 +1,7 @@
 {
 	"targets":[
 		{
-			"target_name":"opencl",
+			"target_name":"generator_opencl",
 			"include_dirs":[
 				"deps/opencl/include",
 			],
@@ -14,12 +14,26 @@
 				"src/opencl/OpenclProgram.cpp",
 				"src/opencl/OpenclKernel.cpp",
 				"src/opencl/OpenclError.cpp",
-				"src/burstMine/opencl/ContextOpencl.cpp",
-				"src/burstMine/opencl/OpenclDeviceConfig.cpp",
-				"src/burstMine/opencl/js/JsOpencl.cpp",
-				"src/burstMine/opencl/js/JsContextOpencl.cpp"
+				"src/opencl/js/JsOpenclPlatform.cpp",
+				"src/opencl/js/JsOpenclDevice.cpp",
+				"src/opencl/js/JsOpenclError.cpp",
+				"src/burstMine/generators/GenerationWork.cpp",
+				"src/burstMine/generators/js/JsGenerationWork.cpp",
+				"src/burstMine/generators/opencl/ContextOpencl.cpp",
+				"src/burstMine/generators/opencl/ContextOpenclConfig.cpp",
+				"src/burstMine/generators/opencl/js/JsGeneratorOpencl.cpp",
+				"src/burstMine/generators/opencl/js/JsContextOpencl.cpp",
+				"src/burstMine/generators/opencl/js/JsContextOpenclConfig.cpp"
 			],
 			"conditions":[
+				["OS == 'win'", {
+					"msvs_settings":{
+						"VCCLCompilerTool":{
+							"ExceptionHandling":"1",
+							"DisableSpecificWarnings":["4290"]
+						}
+					}
+				}],
 				["OS == 'win' and target_arch == 'x64'", {
 					"link_settings":{
 						"library_dirs":[

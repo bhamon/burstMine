@@ -1,7 +1,6 @@
 #ifndef CRYO_OPENCL_COMMAND_QUEUE_H
 #define CRYO_OPENCL_COMMAND_QUEUE_H
 
-#include <memory>
 #include <vector>
 #include <exception>
 #include <CL/cl.h>
@@ -15,10 +14,10 @@ namespace opencl {
 
 class OpenclCommandQueue {
 	private:
-		std::unique_ptr<cl_command_queue> m_handle;
+		cl_command_queue m_handle;
 
 	public:
-		OpenclCommandQueue(std::unique_ptr<cl_command_queue>& p_handle);
+		OpenclCommandQueue(const cl_command_queue& p_handle);
 		OpenclCommandQueue(const OpenclCommandQueue& p_other) = delete;
 		virtual ~OpenclCommandQueue() throw ();
 
@@ -26,9 +25,10 @@ class OpenclCommandQueue {
 
 		inline const cl_command_queue& getHandle() const;
 
-		void enqueueNDRangeKernel(const std::shared_ptr<OpenclKernel>& p_kernel, const std::vector<std::size_t>& p_globalWorkSizes, const std::vector<std::size_t>& p_localWorkSizes) throw (std::exception, OpenclError);
-		void enqueueNDRangeKernel(const std::shared_ptr<OpenclKernel>& p_kernel, std::size_t p_globalWorkSize, std::size_t p_localWorkSize) throw (std::exception, OpenclError);
-		void enqueueReadBuffer(const std::shared_ptr<OpenclBuffer>& p_bufferDevice, std::size_t p_offset, std::size_t p_size, unsigned char* p_bufferCpu) throw (OpenclError);
+// TODO: add cl_event support
+		void enqueueNDRangeKernel(const OpenclKernel& p_kernel, const std::vector<std::size_t>& p_globalWorkSizes, const std::vector<std::size_t>& p_localWorkSizes) throw (std::exception, OpenclError);
+		void enqueueNDRangeKernel(const OpenclKernel& p_kernel, std::size_t p_globalWorkSize, std::size_t p_localWorkSize) throw (std::exception, OpenclError);
+		void enqueueReadBuffer(const OpenclBuffer& p_bufferDevice, std::size_t p_offset, std::size_t p_size, unsigned char* p_bufferCpu) throw (OpenclError);
 		void flush();
 		void finish();
 };
@@ -39,7 +39,7 @@ namespace cryo {
 namespace opencl {
 
 inline const cl_command_queue& OpenclCommandQueue::getHandle() const {
-	return *m_handle;
+	return m_handle;
 }
 
 }}

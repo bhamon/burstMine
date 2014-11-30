@@ -1,13 +1,25 @@
+#include <memory>
+
 #include "OpenclPlatform.h"
 
 namespace cryo {
 namespace opencl {
 
-OpenclPlatform::OpenclPlatform(std::unique_ptr<cl_platform_id>& p_handle)
-: m_handle(std::move(p_handle)) {
+OpenclPlatform::OpenclPlatform(const cl_platform_id& p_handle)
+: m_handle(p_handle) {
+}
+
+OpenclPlatform::OpenclPlatform(const OpenclPlatform& p_other)
+: m_handle(p_other.m_handle) {
 }
 
 OpenclPlatform::~OpenclPlatform() throw () {
+}
+
+OpenclPlatform& OpenclPlatform::operator=(const OpenclPlatform& p_other) {
+	m_handle = p_other.m_handle;
+
+	return *this;
 }
 
 std::string OpenclPlatform::getName() const throw (OpenclError) {
@@ -25,13 +37,13 @@ std::string OpenclPlatform::getVersion() const throw (OpenclError) {
 std::string OpenclPlatform::getInfoString(const cl_platform_info& p_paramName) const throw (OpenclError) {
 	cl_int error;
 	std::size_t size = 0;
-	error = clGetPlatformInfo(*m_handle, p_paramName, 0, 0, &size);
+	error = clGetPlatformInfo(m_handle, p_paramName, 0, 0, &size);
 	if(error != CL_SUCCESS) {
 		throw OpenclError(error, "Unable to retrieve info size");
 	}
 
 	std::unique_ptr<char[]> buffer(new char[size]);
-	error = clGetPlatformInfo(*m_handle, p_paramName, size, (void*)buffer.get(), 0);
+	error = clGetPlatformInfo(m_handle, p_paramName, size, (void*)buffer.get(), 0);
 	if(error != CL_SUCCESS) {
 		throw OpenclError(error, "Unable to retrieve info value");
 	}
@@ -39,8 +51,8 @@ std::string OpenclPlatform::getInfoString(const cl_platform_info& p_paramName) c
 	return std::string(buffer.get());
 }
 
-std::vector<std::shared_ptr<OpenclPlatform>> OpenclPlatform::list() throw (OpenclError) {
-	std::vector<std::shared_ptr<OpenclPlatform>> list;
+std::vector<OpenclPlatform> OpenclPlatform::list() throw (OpenclError) {
+	std::vector<OpenclPlatform> list;
 	cl_int error;
 
 	cl_uint platformsNumber = 0;
@@ -56,8 +68,7 @@ std::vector<std::shared_ptr<OpenclPlatform>> OpenclPlatform::list() throw (Openc
 	}
 
 	for(cl_uint i = 0 ; i < platformsNumber ; ++i) {
-		std::unique_ptr<cl_platform_id> platform(new cl_platform_id(platforms[i]));
-		list.push_back(std::shared_ptr<OpenclPlatform>(new OpenclPlatform(platform)));
+		list.push_back(OpenclPlatform(platforms[i]));
 	}
 
 	return list;
