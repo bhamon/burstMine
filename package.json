@@ -7,16 +7,18 @@
 		"type":"git",
 		"url":"https://github.com/bhamon/burstMine.git"
 	},
-	"main":"lib/mine.js",
+	"main":"lib/index.js",
 	"engines":{
 		"node":"~0.10"
 	},
 	"dependencies":{
 		"q":"~1.0",
 		"bunyan":"~1.2",
+		"tingodb":"~0.3",
 		"express":"~4.9",
 		"body-parser":"~1.9",
 		"cors":"~2.5",
-		"express-validator":"~2.7"
+		"express-validator":"~2.7",
+		"storage-device-info":"~1.0"
 	}
 }

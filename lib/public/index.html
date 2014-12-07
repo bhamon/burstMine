@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html ng-app="burstMine">
+	<head>
+		<title>Burst mine v{{version}}</title>
+		<base href="/">
+		<meta charset="utf8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="stylesheet" href="styles/bootstrap-3.3.1.min.css">
+		<link rel="stylesheet" href="styles/bootstrap-theme-3.3.1.min.css">
+		<link rel="stylesheet" href="styles/burstMine.css">
+		<script src="scripts/angular-1.3.4.min.js"></script>
+		<script src="scripts/angular-ui-router-0.2.12.min.js"></script>
+		<script src="scripts/ui-bootstrap-tpls-0.12.0.min.js"></script>
+		<script src="scripts/ui-bootstrap-showErrors-2.1.0.min.js"></script>
+		<script src="scripts/burstMine.js"></script>
+		<script src="scripts/burstMine-navbar.js"></script>
+		<script src="scripts/burstMine-mines.js"></script>
+		<script src="scripts/burstMine-mine-add.js"></script>
+		<script src="scripts/burstMine-mine-remove.js"></script>
+		<script src="scripts/burstMine-mine.js"></script>
+		<script src="scripts/burstMine-mine-overview.js"></script>
+		<script src="scripts/burstMine-settings.js"></script>
+	</head>
+	<body>
+		<nav class="navbar navbar-inverse navbar-fixed-top" ng-controller="burstMine-navbar">
+			<div class="container-fluid">
+				<div class="navbar-header">
+					<button type="button" class="navbar-toggle collapsed" ng-click="data.collapsed = !data.collapsed">
+						<span class="sr-only">Toggle navigation</span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+						<span class="icon-bar"></span>
+					</button>
+					<a class="navbar-brand" ui-sref="home">Burst mine <small>v{{version}}</small></a>
+				</div>
+				<div class="navbar-collapse" collapse="data.collapsed">
+					<ul class="nav navbar-nav navbar-right">
+						<li><a ui-sref="mines">Mines</a></li>
+						<li><a ui-sref="settings">Settings</a></li>
+						<li><a ui-sref="help">Help</a></li>
+					</ul>
+				</div>
+			</div>
+		</nav>
+		<div class="container-fluid" ui-view></div>
+	</body>
+</html>

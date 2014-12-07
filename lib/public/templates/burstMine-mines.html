@@ -1,0 +1,38 @@
+<div>
+	<h1 class="page-header">Mines</h1>
+	<alert ng-if="data.status == 'load.failure'" type="danger" close="clearStatus()">
+		An error occured while retrieving mines.
+	</alert>
+	<alert ng-if="data.status == 'add.failure' || data.status == 'remove.failure'" type="danger" close="clearStatus()">
+		An error occured while saving changes.
+	</alert>
+	<table class="table table-hover">
+		<thead>
+			<tr>
+				<th width="10%">Id</th>
+				<th width="20%">Name</th>
+				<th>URL</th>
+				<th width="20">
+					<button type="button" class="btn btn-default btn-xs" ng-click="add()">
+						<span class="glyphicon glyphicon-plus"></span>
+					</button>
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-if="mines.length == 0">
+				<td colspan="3">No mines configured</td>
+			</tr>
+			<tr ng-repeat="mine in data.mines" ng-click="view(mine)">
+				<td>{{mine.id}}</td>
+				<td>{{mine.name}}</td>
+				<td>{{mine.url}}</td>
+				<td>
+					<button type="button" class="btn btn-default btn-xs" ng-click="remove(mine)">
+						<span class="glyphicon glyphicon-remove"></span>
+					</button>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
