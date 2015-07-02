@@ -1,0 +1,50 @@
+<div class="modal-header">
+	<h3 class="modal-title">Edit generator preset</h3>
+</div>
+<div class="modal-body">
+	<alert ng-if="error" type="danger" close="clearError()">
+		<p>An error occured while saving the generator preset.</p>
+		<p>
+			<span class="label label-danger">{{error.type}}</span>
+			{{error.message}}
+		</p>
+		<pre ng-if="error.details">{{error.details | json}}</pre>
+	</alert>
+	<form name="formGeneratorPreset">
+		<div class="form-group" show-errors>
+			<label class="control-label">Name</label>
+			<input type="text" name="name" class="form-control" ng-model="data.name" required>
+		</div>
+		<div class="form-group" show-errors>
+			<label class="control-label">Description</label>
+			<input type="text" name="description" class="form-control" ng-model="data.description" required>
+		</div>
+		<div class="form-group" show-errors>
+			<label class="control-label">Plugin</label>
+			<div class="input-group">
+				<select name="plugin" class="form-control" ng-model="data.plugin" ng-options="plugin.type for plugin in plugins" ng-change="loadComponents()" required></select>
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button" ng-click="pluginInfo()" ng-disabled="!data.plugin">
+						<span class="glyphicon glyphicon-info-sign"></span>
+					</button>
+				</span>
+			</div>
+		</div>
+		<div class="form-group" show-errors>
+			<label class="control-label">Component</label>
+			<div class="input-group">
+				<select name="component" class="form-control" ng-model="data.component" ng-options="component.type for component in components" ng-change="clearParams()" ng-disabled="!data.plugin" required></select>
+				<span class="input-group-btn">
+					<button class="btn btn-default" type="button" ng-click="componentInfo()" ng-disabled="!data.component">
+						<span class="glyphicon glyphicon-info-sign"></span>
+					</button>
+				</span>
+			</div>
+		</div>
+		<burst-mine:plugin-component ng-if="data.component" template="data.component.template" controller="data.component.controller" component="data"></burst-mine:plugin-component>
+	</form>
+</div>
+<div class="modal-footer">
+	<button class="btn btn-primary" ng-click="save()">Save</button>
+	<button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+</div>

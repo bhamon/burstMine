@@ -1,0 +1,158 @@
+<h1 class="page-header">Plotting</h1>
+<div class="panel panel-default" ng-controller="burstMine-dashboard-plotting-generatorPresets">
+	<div class="panel-heading">
+		<h3 class="panel-title">Generator presets</h3>
+	</div>
+	<div class="panel-body">
+		<alert ng-if="error" type="danger" close="clearError()">
+			<p>An error occurred while retrieving the generator presets list.</p>
+			<p>
+				<span class="label label-danger">{{error.type}}</span>
+				{{error.message}}
+			</p>
+			<pre ng-if="error.details">{{error.details | json}}</pre>
+		</alert>
+		<p>The table bellow lists the configured generators on your system.</p>
+	</div>
+	<table class="table table-hover burstMine-table-buttons">
+		<thead>
+			<tr>
+				<th>Type</th>
+				<th>Name</th>
+				<th>Description</th>
+				<th>
+					<button type="button" class="btn btn-primary btn-xs" ng-click="create()">
+						<span class="glyphicon glyphicon-plus"></span>
+					</button>
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-if="generatorPresets.length == 0">
+				<td colspan="4">No generator preset found.</td>
+			</tr>
+			<tr ng-repeat="generatorPreset in generatorPresets">
+				<td>{{generatorPreset.plugin}}.{{generatorPreset.type}}</td>
+				<td>{{generatorPreset.name}}</td>
+				<td>{{generatorPreset.description}}</td>
+				<td>
+					<button type="button" class="btn btn-success btn-xs" tooltip="Benchmark" ng-click="benchmark(generatorPreset)">
+						<span class="glyphicon glyphicon-stats"></span>
+					</button>
+					<button type="button" class="btn btn-danger btn-xs" ng-click="remove(generatorPreset)">
+						<span class="glyphicon glyphicon-remove"></span>
+					</button>
+				</td>
+			</tr>
+		</thead>
+	</table>
+</div>
+<div class="panel panel-default" ng-controller="burstMine-dashboard-plotting-generations">
+	<div class="panel-heading">
+		<h3 class="panel-title">Plots generations</h3>
+	</div>
+	<div class="panel-body">
+		<alert ng-if="error" type="danger" close="clearError()">
+			<p>An error occurred while retrieving the generations list.</p>
+			<p>
+				<span class="label label-danger">{{error.type}}</span>
+				{{error.message}}
+			</p>
+			<pre ng-if="error.details">{{error.details | json}}</pre>
+		</alert>
+		<p>The table bellow lists the pending generations.</p>
+	</div>
+	<table class="table table-hover burstMine-table-buttons">
+		<thead>
+			<tr>
+				<th>Strategy</th>
+				<th>Creation date</th>
+				<th>Modification date</th>
+				<th>Status</th>
+				<th>
+					<button type="button" class="btn btn-primary btn-xs" ng-click="create()">
+						<span class="glyphicon glyphicon-plus"></span>
+					</button>
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-if="generations.length == 0">
+				<td colspan="5">No generation found.</td>
+			</tr>
+			<tr ng-repeat="generation in generations">
+				<td>{{generation.plugin}}.{{generation.type}}</td>
+				<td>{{generation.creationDate | date:'dd/MM/yyyy HH:mm:ss'}}</td>
+				<td>{{generation.modificationDate | date:'dd/MM/yyyy HH:mm:ss'}}</td>
+				<td ng-switch="generation.status">
+					<span ng-switch-when="pending" class="label label-default">Pending</span>
+					<span ng-switch-when="generating" class="label label-info">Generating</span>
+					<span ng-switch-when="paused" class="label label-warning">Paused</span>
+					<span ng-switch-when="success" class="label label-success">Success</span>
+					<span ng-switch-when="error" class="label label-danger">Error</span>
+				</td>
+				<td>
+					<button type="button" class="btn btn-primary btn-xs" ng-click="details(generation)">
+						<span class="glyphicon glyphicon-search"></span>
+					</button>
+					<button type="button" class="btn btn-danger btn-xs" ng-click="remove(generation)">
+						<span class="glyphicon glyphicon-remove"></span>
+					</button>
+				</td>
+			</tr>
+		</thead>
+	</table>
+</div>
+<div class="panel panel-default" ng-controller="burstMine-dashboard-plotting-plots">
+	<div class="panel-heading">
+		<h3 class="panel-title">Plots</h3>
+	</div>
+	<div class="panel-body">
+		<alert ng-if="error" type="danger" close="clearError()">
+			<p>An error occurred while retrieving the plots list.</p>
+			<p>
+				<span class="label label-danger">{{error.type}}</span>
+				{{error.message}}
+			</p>
+			<pre ng-if="error.details">{{error.details | json}}</pre>
+		</alert>
+		<p>The table bellow list the available plots in the system.</p>
+	</div>
+	<table class="table table-hover burstMine-table-buttons">
+		<thead>
+			<tr>
+				<th>Type</th>
+				<th>Address</th>
+				<th>Offset</th>
+				<th>Number</th>
+				<th>Status</th>
+				<th>
+					<button type="button" class="btn btn-info btn-xs" ng-click="import()" tooltip="Import">
+						<span class="glyphicon glyphicon-import"></span>
+					</button>
+				</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-if="!plots.length">
+				<td colspan="6">No plots found.</td>
+			</tr>
+			<tr ng-repeat="plot in plots | orderBy:['address', 'offset']">
+				<td>{{plot.plugin}}.{{plot.type}}</td>
+				<td>{{plot.address}}</td>
+				<td>{{plot.offset}}</td>
+				<td>{{plot.number}}</td>
+				<td ng-switch="plot.status">
+					<span ng-switch-when="pending" class="label label-danger">Pending</span>
+					<span ng-switch-when="generating" class="label label-warning">Generating</span>
+					<span ng-switch-when="generated" class="label label-success">Generated</span>
+				</td>
+				<td>
+					<button ng-if="plot.status != 'generating'" type="button" class="btn btn-danger btn-xs" ng-click="remove(plot)">
+						<span class="glyphicon glyphicon-remove"></span>
+					</button>
+				</td>
+			</tr>
+		</thead>
+	</table>
+</div>

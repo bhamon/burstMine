@@ -1,0 +1,12 @@
+@font-face { font-family: 'Open Sans'; font-style: normal; font-weight: 300; src: local('Open Sans Light'), local('OpenSans-Light'), url(../fonts/open-sans-300.woff) format('woff'); }
+@font-face { font-family: 'Open Sans'; font-style: normal; font-weight: 800; src: local('Open Sans Light'), local('OpenSans-Light'), url(../fonts/open-sans-800.woff) format('woff'); }
+
+.nav, .pagination, .carousel, .panel-title a { cursor: pointer; }
+
+body { padding-top: 50px; font: 300 10pt 'Open Sans', sans-serif; color: #444; }
+
+.burstMine-nav { background-color: #f5f5f5; }
+.burstMine-nav > .nav > li > a.active { background-color: #428bca; color: #fff; }
+
+.burstMine-table-buttons tr > th:last-of-type:not([colspan]) { text-align: right; }
+.burstMine-table-buttons tr > td:last-of-type:not([colspan]) { text-align: right; }

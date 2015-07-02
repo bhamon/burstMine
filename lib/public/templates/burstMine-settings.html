@@ -1,0 +1,106 @@
+<h1 class="page-header">Settings</h1>
+<div class="panel panel-default" ng-controller="burstMine-settings-system">
+	<div class="panel-heading">
+		<h3 class="panel-title">System</h3>
+	</div>
+	<div class="panel-body">
+		<alert ng-if="error" type="danger" close="clearError()">
+			<p>An error occured while processing your request.</p>
+			<p>
+				<span class="label label-danger">{{error.type}}</span>
+				{{error.message}}
+			</p>
+			<pre ng-if="error.details">{{error.details | json}}</pre>
+		</alert>
+		<alert ng-if="success" type="success" close="clearSuccess()">
+			Settings saved successfully.
+		</alert>
+		<form name="formSystem" class="form-horizontal">
+			<div class="form-group">
+				<label class="col-sm-2 control-label">Version</label>
+				<div class="col-sm-10">
+					<p class="form-control-static">
+						{{global.status.version}}
+						<span ng-switch="version.status">
+							<span ng-switch-when="fetching" class="label label-info">Fetching</span>
+							<span ng-switch-when="upToDate" class="label label-success">Up to date</span>
+							<span ng-switch-when="obsolete" class="label label-warning">Obsolete ({{version.newVersion}})</span>
+							<span ng-switch-when="deprecated" class="label label-danger">Deprecated</span>
+						</span>
+					</p>
+				</div>
+			</div>
+			<div class="form-group" show-errors>
+				<label class="col-sm-2 control-label">Plugins repository</label>
+				<div class="col-sm-10">
+					<input type="url" name="pluginsRepository" class="form-control" ng-model="data.pluginsRepository" placeholder="http://x.x.x.x:yyyy" required>
+				</div>
+			</div>
+			<div class="form-group" show-errors>
+				<label class="col-sm-2 control-label">SMTP host</label>
+				<div class="col-sm-10">
+					<input type="text" name="smtpHost" class="form-control" ng-model="data.smtpHost" placeholder="x.x.x.x" required>
+				</div>
+			</div>
+			<div class="form-group" show-errors>
+				<label class="col-sm-2 control-label">SMTP port</label>
+				<div class="col-sm-10">
+					<input type="number" name="smtpPort" class="form-control" ng-model="data.smtpPort" min="1" max="65535" required>
+				</div>
+			</div>
+			<div class="form-group" show-errors>
+				<label class="col-sm-2 control-label">Sender email</label>
+				<div class="col-sm-10">
+					<input type="email" name="senderEmail" class="form-control" ng-model="data.senderEmail" placeholder="sender@domain.com" required>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-2 col-sm-10">
+					<button type="submit" class="btn btn-primary" ng-click="save()">Save</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+<div class="panel panel-default" ng-controller="burstMine-settings-plugins">
+	<div class="panel-heading">
+		<h3 class="panel-title">Plugins</h3>
+	</div>
+	<div class="panel-body">
+		<alert ng-if="error" type="danger" close="clearError()">
+			<p>An error occured while retrieving plugins list.</p>
+			<p>
+				<span class="label label-danger">{{error.type}}</span>
+				{{error.message}}
+			</p>
+			<pre ng-if="error.details">{{error.details | json}}</pre>
+		</alert>
+		<p>The table bellow lists the installed plugins on your system.</p>
+	</div>
+	<table class="table table-hover">
+		<thead>
+			<tr>
+				<th>Type</th>
+				<th>Description</th>
+				<th>Version</th>
+				<th>Status</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-if="!plugins.length">
+				<td colspan="4">No plugin installed.</td>
+			</tr>
+			<tr ng-repeat="plugin in plugins | orderBy:'type'">
+				<td>{{plugin.type}}</td>
+				<td>{{plugin.description}}</td>
+				<td>{{plugin.version}}</td>
+				<td ng-switch="plugin.status">
+					<span ng-switch-when="fetching" class="label label-info">Fetching</span>
+					<span ng-switch-when="upToDate" class="label label-success">Up to date</span>
+					<span ng-switch-when="obsolete" class="label label-warning">Obsolete ({{plugin.newVersion}})</span>
+					<span ng-switch-when="deprecated" class="label label-danger">Deprecated</span>
+				</td>
+			</tr>
+		</thead>
+	</table>
+</div>

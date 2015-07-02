@@ -1,0 +1,18 @@
+<div class="modal-header">
+	<h3 class="modal-title">Import plots</h3>
+</div>
+<div class="modal-body">
+	<alert ng-if="error" type="danger" close="clearError()">
+		<p>An error occured while importing plots.</p>
+		<p>
+			<span class="label label-danger">{{error.type}}</span>
+			{{error.message}}
+		</p>
+		<pre ng-if="error.details">{{error.details | json}}</pre>
+	</alert>
+	// TODO
+</div>
+<div class="modal-footer">
+	<button class="btn btn-primary" ng-click="add()">Add</button>
+	<button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+</div>

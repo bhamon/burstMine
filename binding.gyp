@@ -1,0 +1,37 @@
+{
+	"targets":[
+		{
+			"target_name":"burstMine",
+			"sources":[
+				"src/burstMine/ScoopsBuffer.cpp",
+				"src/burstMine/js/JsScoopsBuffer.cpp",
+				"src/burstMine/js/JsBurstMine.cpp"
+			],
+			"conditions":[
+				["OS == 'win'", {
+					"configurations":{
+						"Release":{
+							"msvs_settings":{
+								"VCCLCompilerTool":{
+									"ExceptionHandling":1,
+									"DisableSpecificWarnings":["4290"]
+								}
+							}
+						}
+					}
+				}]
+			]
+		},
+		{
+			"target_name":"post-build",
+			"type":"none",
+			"dependencies":["burstMine"],
+			"copies":[
+				{
+					"files":["<(PRODUCT_DIR)/burstMine.node"],
+					"destination":"bin"
+				}
+			]
+		}
+	]
+}

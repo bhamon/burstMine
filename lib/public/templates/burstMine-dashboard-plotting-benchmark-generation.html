@@ -1,0 +1,94 @@
+<div class="modal-header">
+	<h3 class="modal-title">Edit generation</h3>
+</div>
+<div class="modal-body">
+	<alert ng-if="error" type="danger" close="clearError()">
+		<p>An error occurred while adding the generation.</p>
+		<p>
+			<span class="label label-danger">{{error.type}}</span>
+			{{error.message}}
+		</p>
+		<pre ng-if="error.details">{{error.details | json}}</pre>
+	</alert>
+	<form name="formGeneration">
+		<accordion close-others="false">
+			<accordion-group is-open="true">
+				<accordion-heading>Strategy</accordion-heading>
+				<div class="form-group" show-errors>
+					<label class="control-label">Plugin</label>
+					<div class="input-group">
+						<select name="plugin" class="form-control" ng-model="data.plugin" ng-options="plugin.type for plugin in plugins" ng-change="loadComponents()" required></select>
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="button" ng-click="pluginInfo()" ng-disabled="!data.plugin">
+								<span class="glyphicon glyphicon-info-sign"></span>
+							</button>
+						</span>
+					</div>
+				</div>
+				<div class="form-group" show-errors>
+					<label class="control-label">Component</label>
+					<div class="input-group">
+						<select name="component" class="form-control" ng-model="data.component" ng-options="component.type for component in components" ng-change="clearParams()" ng-disabled="!data.plugin" required></select>
+						<span class="input-group-btn">
+							<button class="btn btn-default" type="button" ng-click="componentInfo()" ng-disabled="!data.component">
+								<span class="glyphicon glyphicon-info-sign"></span>
+							</button>
+						</span>
+					</div>
+				</div>
+				<burst-mine:plugin-component ng-if="data.component" template="data.component.template" controller="data.component.controller" component="data"></burst-mine:plugin-component>
+			</accordion-group>
+			<accordion-group is-open="true">
+				<accordion-heading>Plots</accordion-heading>
+				<table class="table table-hover burstMine-table-buttons">
+					<thead>
+						<tr>
+							<th>Type</th>
+							<th>Address</th>
+							<th>Offset</th>
+							<th>Number</th>
+							<th>
+								<button type="button" class="btn btn-primary btn-xs" ng-click="addPlots()">
+									<span class="glyphicon glyphicon-plus"></span>
+								</button>
+							</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr ng-if="data.plots.length == 0">
+							<td colspan="5">No plots created.</td>
+						</tr>
+						<tr ng-repeat="plots in data.plots">
+							<td>{{plots.plugin}}.{{plots.type}}</td>
+							<td>{{plots.address}}</td>
+							<td>{{plots.offset}}</td>
+							<td>{{plots.number}}</td>
+							<td>
+								<button type="button" class="btn btn-danger btn-xs" ng-click="removePlots(plots)">
+									<span class="glyphicon glyphicon-remove"></span>
+								</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</accordion-group>
+			<accordion-group is-disabled="!data.notification.active" is-open="data.notification.open">
+				<accordion-heading>
+					<span ng-class="{'text-muted':!data.notification.active}">Notification</span>
+					<div class="btn-group pull-right">
+						<label class="btn btn-success btn-xs" ng-model="data.notification.active" btn-radio="true" ng-click="enableNotification($event)">Yes</label>
+						<label class="btn btn-danger btn-xs" ng-model="data.notification.active" btn-radio="false" ng-click="disableNotification($event)">No</label>
+					</div>
+				</accordion-heading>
+				<div class="form-group" show-errors>
+					<label class="control-label">Recipient</label>
+					<input type="email" name="notificationRecipient" class="form-control" ng-model="data.notification.recipient" placeholder="recipient@domain.com" ng-required="data.notification.active" ng-disabled="!data.notification.active">
+				</div>
+			</accordion-group>
+		</accordion>
+	</form>
+</div>
+<div class="modal-footer">
+	<button class="btn btn-primary" ng-click="save()">Save</button>
+	<button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+</div>

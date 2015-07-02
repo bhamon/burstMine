@@ -1,0 +1,82 @@
+<div>
+<b>// TODO: review</b>
+	<h1 class="page-header">Help</h1>
+	<h2>Introduction</h2>
+	<p>
+		Burst is a coin based on a Proof of HDD capacity (PoC) algorithm. Thus, to mine this coin you need to provide as much free HDD space as you want.
+		The more HDD space you dedicate to Burst, the more coins you'll earn with the mining process.
+	</p>
+	<p>
+		To prepare this free space, you'll have to go through a <a ui-sref="dashboard.plotting">plotting</a> process.
+		This step will fill your amount of free space with a lot of generated chunk of data (called <code>scoops</code>) required by the <a ui-sref="dashboard.mining">mining</a> process.
+		Once plotted, your HDD space can be used by any Burst miner to mine some coins.
+	</p>
+	<p>
+		Burst mine is a distributed and graphical web interface to handle the whole <a ui-sref="dashboard.plotting">plotting</a> and <a ui-sref="dashboard.mining">mining</a> process to make it easier to use.
+		It also provides a live monitoring system and can be scaled to fit your needs (see <code>multiple instances</code>).
+	</p>
+	<h2>Basics</h2>
+	<p>
+		Burst mine is a plugin-based system, thus it can be extended in many ways.
+		The following categories sum up all the components that can be added via the plugin system.
+	</p>
+	<h3>Generator</h3>
+	<p>
+		A generator is a component used to generate scoops. Each scoop is a 64 bytes chunk of data.
+		By construction, those scoops are produced per pack of 4096 (called a <code>plot</code>).
+	</p>
+	<p>
+		The generation step needs three parameters:
+		<ul>
+			<li><code>address</code>: Your Burst numerical account address. This address can be found on the official wallet.</li>
+			<li><code>offset</code>: The first plot number from where to start the generation.</li>
+			<li><code>workSize</code>: The number of plots to generate.</li>
+		</ul>
+	</p>
+	<h3>Plots file</h3>
+	<p>
+		Once generated, the scoops need to be reordered before being written to a file.
+		Each plots file holds one or more plots with reordered scoops.
+		The number of plots in a file is called the <code>plotsNumber</code>.
+	</p>
+	<p>
+		A plots file embed two components:
+		<ul>
+			<li><code>writer</code>: This component is responsible for reordering and writing the generated scoops to the file.</li>
+			<li><code>reader</code>: This component is responsible for reading scoops from the file in the mining process.</li>
+		</ul>
+	</p>
+	<p>
+		There are two main strategies to store the scoops in the final file:
+		<ul>
+			<li>
+				<code>staggered</code>: This version reorders the scoops in an intermediate buffer before writing them.
+				The buffer length is expressed in plots number with the <code>staggerSize</code> parameter.
+				In this configuration, the <code>plotsNumber</code> parameter must be a multiple of <code>staggerSize</code>.
+				<ul>
+					<li>Pros: Fast reordering and writing.</li>
+					<li>Cons: The lower the <code>staggerSize</code>, the more I/O access will be required by the mining process.</li>
+				</ul>
+			</li>
+			<li>
+				<code>direct</code>: This version writes the scoops directly to the file (with a potential pre-caching).
+				<ul>
+					<li>Pros: Generates fully optimized plots file (<code>staggerSize = plotsNumber</code>).</li>
+					<li>Cons: The number of random I/O access is greatly increased, thus slowing down the writing speed.</li>
+				</ul>
+			</li>
+		</ul>
+	</p>
+	<h3>Generation strategy</h3>
+	<p>
+		The generation strategy uses generators to create plots files. Each strategy comes with its pros and cons.
+		It is up to you to select the best strategy based on your hardware capabilities.
+	</p>
+	<h3>Optimizer</h3>
+	<p>
+		To reduce the disk stress while mining, it is advised to use the highest possible <code>staggerSize</code>.
+		An optimizer is a component used to increase the <code>staggerSize</code> parameter of an already plotted file to match the <code>plotsNumber</code> parameter.
+	</p>
+	<h3>Miner</h3>
+	<p>Not implemented yet.</p>
+</div>

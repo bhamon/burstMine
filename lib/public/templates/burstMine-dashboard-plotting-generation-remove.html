@@ -1,0 +1,18 @@
+<div class="modal-header">
+	<h3 class="modal-title">Remove generation</h3>
+</div>
+<div class="modal-body">
+	<alert ng-if="error" type="danger" close="clearError()">
+		<p>An error occured while removing the generation.</p>
+		<p>
+			<span class="label label-danger">{{error.type}}</span>
+			{{error.message}}
+		</p>
+		<pre ng-if="error.details">{{error.details | json}}</pre>
+	</alert>
+	<p>The generation and the ongoing plots will be removed. Are you sure?</p>
+</div>
+<div class="modal-footer">
+	<button class="btn btn-primary" ng-click="yes()">Yes</button>
+	<button class="btn btn-warning" ng-click="no()">No</button>
+</div>
