@@ -9,3 +9,7 @@ Features :
 - TODO
 
 If you like this software, consider making a donation ;)
+
+## Build instructions
+
+Please refer to the [INSTALL](INSTALL.md) guide.
