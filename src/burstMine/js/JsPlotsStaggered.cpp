@@ -43,7 +43,7 @@ cryo::burstMine::PlotsStaggered JsPlotsStaggered::FromObject(v8::Isolate* p_isol
 
 	if(!params->Has(v8::String::NewFromUtf8(p_isolate, "staggerSize"))) {
 		throw std::runtime_error("Missing [params.staggerSize] parameter");
-	} else if(!p_object->Get(v8::String::NewFromUtf8(p_isolate, "staggerSize"))->IsNumber()) {
+	} else if(!params->Get(v8::String::NewFromUtf8(p_isolate, "staggerSize"))->IsNumber()) {
 		throw std::runtime_error("Invalid [params.staggerSize] parameter");
 	}
 
